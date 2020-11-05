@@ -1,11 +1,8 @@
 package main
+
 import (
 	"flag"
 	"fmt"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"syscall"
 	"github.com/dgraph-io/badger"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -17,13 +14,30 @@ import (
 	"github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/privval"
 	"github.com/tendermint/tendermint/proxy"
+	"net"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
 )
+
 var configFile string
+
 func init() {
 	flag.StringVar(&configFile, "config", "$HOME/.tendermint/config/config.toml", "Path to config.toml")
 }
 func main() {
 
+	go func() {
+		listener, err := net.Listen("tcp", ":0")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Profiling listen to: " + listener.Addr().String())
+		fmt.Println(http.Serve(listener, nil))
+	}()
 	db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to open badger db: %v", err)
