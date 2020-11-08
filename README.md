@@ -21,7 +21,7 @@ TMHOME="/tmp/example" tendermint init
 
 gedit /tmp/example/data/priv_validator_state.json
 
-./kvstore -config "/tmp/example/config/config.toml"
+./kvstore -config "/tmp/example/config/config.toml" >> /opt/ramUsage/tmbasic.log 2>&1  &
 
 # Run the test
 

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/dgraph-io/badger"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -37,13 +38,13 @@ func main() {
 		fmt.Println("Profiling listen to: " + listener.Addr().String())
 		fmt.Println(http.Serve(listener, nil))
 	}()
-	//db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
-	//if err != nil {
-	//	fmt.Fprintf(os.Stderr, "failed to open badger db: %v", err)
-	//	os.Exit(1)
-	//}
-	//defer db.Close()
-	app := NewKVStoreApplication() //db
+	db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to open badger db: %v", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+	app := NewKVStoreApplication(db) //db
 	flag.Parse()
 	node, err := newTendermint(app, configFile)
 	if err != nil {
